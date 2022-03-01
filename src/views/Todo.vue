@@ -10,7 +10,7 @@
       @click:append="addNewTask"
       @keyup.enter="addNewTask"
     ></v-text-field>
-    <v-list flat class="pt-0" v-if="todoTasks.length > 0">
+    <v-list flat class="pt-2" v-if="todoTasks.length > 0">
       <div v-for="task in todoTasks" :key="task.id">
         <v-list-item
           @click="toggleTask(task.id)"
@@ -30,40 +30,16 @@
 
             <v-list-item-action>
               <v-btn icon>
-                <v-icon @click="editDailog = true" color="primary lighten-1"
+                <v-icon :disabled="task.done" @click="editTodo(task.id)" color="primary lighten-1"
                   >mdi-pencil</v-icon
                 >
               </v-btn>
 
               <v-btn icon>
-                <v-icon @click="dialog = true" color="primary lighten-1"
+                <v-icon @click="deleteDailog(task.id)" color="primary lighten-1"
                   >mdi-delete</v-icon
-                >
+                > 
               </v-btn>
-
-              <v-dialog v-model="dialog" max-width="290">
-                <v-card>
-                  <v-card-title class="text-h5"> Delete </v-card-title>
-
-                  <v-card-text> are you sure you want to delete? </v-card-text>
-
-                  <v-card-actions>
-                    <v-spacer></v-spacer>
-
-                    <v-btn color="green darken-1" text @click="dialog = false">
-                      No
-                    </v-btn>
-
-                    <v-btn
-                      color="green darken-1"
-                      text
-                      @click="deleteTask(task.id)"
-                    >
-                      Yes
-                    </v-btn>
-                  </v-card-actions>
-                </v-card>
-              </v-dialog>
             </v-list-item-action>
           </template>
         </v-list-item>
@@ -73,7 +49,59 @@
     <div class="text-center pt-10" v-else>
       <strong>No Task Yet...</strong>
     </div>
+    <!-- Edit Dailog -->
+    <v-dialog v-model="editDailog" persistent max-width="600px">
+      <v-card>
+        <v-card-title>
+          <span class="text-h5">Edit Task</span>
+        </v-card-title>
+        <v-card-text>
+          <v-container>
+            <v-row>
+              <v-text-field
+                outlined
+                label="Edit Task"
+                v-model="editTask"
+                clearable
+                hide-details
+              ></v-text-field>
+            </v-row>
+          </v-container>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="blue darken-1" text @click="editDailog = false">
+            Close
+          </v-btn>
+          <v-btn color="blue darken-1" text @click="updateTask(taskId)">
+            Save
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+    <!-- End Edit Dailog -->
+    <!-- Delete Dailog -->
+    <v-dialog v-model="dialog" max-width="290">
+      <v-card>
+        <v-card-title class="text-h5"> Delete </v-card-title>
 
+        <v-card-text> are you sure you want to delete? </v-card-text>
+
+        <v-card-actions>
+          <v-spacer></v-spacer>
+
+          <v-btn color="green darken-1" text @click="dialog = false">
+            No
+          </v-btn>
+
+          <v-btn color="green darken-1" text @click="deleteTask(taskId)">
+            Yes
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+    <!-- End Delete Dailog -->
+    <!-- Message Snackbar -->
     <v-snackbar
       v-model="showMessage"
       rounded="pill"
@@ -103,6 +131,8 @@ export default {
       editDailog: false,
       dialog: false,
       task: "",
+      editTask: "",
+      taskId: "",
       todoTasks: [],
     };
   },
@@ -146,6 +176,29 @@ export default {
       this.showMessage = true;
     },
     /**
+     * Show Edit form
+     */
+    editTodo(id) {
+      this.editDailog = true;
+
+      let task = this.todoTasks.filter((task) => task.id === id)[0];
+      this.editTask = task.title;
+      this.taskId = task.id;
+    },
+    /**
+     * update Task
+     */
+    updateTask(id) {
+      let task = this.todoTasks.filter((task) => task.id === id)[0];
+      task.title = this.editTask;
+
+      this.editTask = "";
+      this.editDailog = false;
+
+      this.message = "Task updated successfully!";
+      this.showMessage = true;
+    },
+    /**
      * Toogle task
      */
     toggleTask(id) {
@@ -157,6 +210,15 @@ export default {
       this.showMessage = true;
       this.messageColor = updateTask.done ? "green" : "red";
       localStorage.setItem("todoTasks", JSON.stringify(this.todoTasks));
+    },
+    /**
+     * Open Delete Dailog
+     */
+    deleteDailog(id) {
+      this.dialog = true;
+
+      let task = this.todoTasks.filter((task) => task.id === id)[0];
+      this.taskId = task.id;
     },
     /**
      * Delete Task
