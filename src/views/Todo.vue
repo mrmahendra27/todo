@@ -30,7 +30,10 @@
 
             <v-list-item-action>
               <v-btn icon>
-                <v-icon :disabled="task.done" @click="editTodo(task.id)" color="primary lighten-1"
+                <v-icon
+                  :disabled="task.done"
+                  @click="editTodo(task.id)"
+                  color="primary lighten-1"
                   >mdi-pencil</v-icon
                 >
               </v-btn>
@@ -38,7 +41,7 @@
               <v-btn icon>
                 <v-icon @click="deleteDailog(task.id)" color="primary lighten-1"
                   >mdi-delete</v-icon
-                > 
+                >
               </v-btn>
             </v-list-item-action>
           </template>
