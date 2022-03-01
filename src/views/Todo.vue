@@ -30,10 +30,76 @@
 
             <v-list-item-action>
               <v-btn icon>
-                <v-icon @click="deleteTask(task.id)" color="primary lighten-1"
+                <v-icon @click="editDailog = true" color="primary lighten-1"
+                  >mdi-pencil</v-icon
+                >
+              </v-btn>
+              <v-dialog v-model="editDailog" persistent max-width="600px">
+                <v-card>
+                  <v-card-title>
+                    <span class="text-h5">Edit Task</span>
+                  </v-card-title>
+                  <v-card-text>
+                    <v-container>
+                      <v-row>
+                        <v-text-field
+                          outlined
+                          label="edit Task"
+                          clearable
+                          hide-details
+                        ></v-text-field>
+                      </v-row>
+                    </v-container>
+                  </v-card-text>
+                  <v-card-actions>
+                    <v-spacer></v-spacer>
+                    <v-btn
+                      color="blue darken-1"
+                      text
+                      @click="editDailog = false"
+                    >
+                      Close
+                    </v-btn>
+                    <v-btn
+                      color="blue darken-1"
+                      text
+                      @click="editDailog = false"
+                    >
+                      Save
+                    </v-btn>
+                  </v-card-actions>
+                </v-card>
+              </v-dialog>
+              
+              <v-btn icon>
+                <v-icon @click="dialog = true" color="primary lighten-1"
                   >mdi-delete</v-icon
                 >
               </v-btn>
+
+              <v-dialog v-model="dialog" max-width="290">
+                <v-card>
+                  <v-card-title class="text-h5"> Delete </v-card-title>
+
+                  <v-card-text> are you sure you want to delete? </v-card-text>
+
+                  <v-card-actions>
+                    <v-spacer></v-spacer>
+
+                    <v-btn color="green darken-1" text @click="dialog = false">
+                      No
+                    </v-btn>
+
+                    <v-btn
+                      color="green darken-1"
+                      text
+                      @click="deleteTask(task.id)"
+                    >
+                      Yes
+                    </v-btn>
+                  </v-card-actions>
+                </v-card>
+              </v-dialog>
             </v-list-item-action>
           </template>
         </v-list-item>
@@ -51,6 +117,8 @@ export default {
   name: "Todo",
   data() {
     return {
+      editDailog: false,
+      dialog: false,
       task: "",
       todoTasks: [],
     };
@@ -62,6 +130,7 @@ export default {
     },
     deleteTask(id) {
       this.todoTasks = this.todoTasks.filter((task) => task.id !== id);
+      this.dialog = false;
     },
     addNewTask() {
       this.todoTasks.push({
