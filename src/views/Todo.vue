@@ -34,43 +34,7 @@
                   >mdi-pencil</v-icon
                 >
               </v-btn>
-              <v-dialog v-model="editDailog" persistent max-width="600px">
-                <v-card>
-                  <v-card-title>
-                    <span class="text-h5">Edit Task</span>
-                  </v-card-title>
-                  <v-card-text>
-                    <v-container>
-                      <v-row>
-                        <v-text-field
-                          outlined
-                          label="edit Task"
-                          clearable
-                          hide-details
-                        ></v-text-field>
-                      </v-row>
-                    </v-container>
-                  </v-card-text>
-                  <v-card-actions>
-                    <v-spacer></v-spacer>
-                    <v-btn
-                      color="blue darken-1"
-                      text
-                      @click="editDailog = false"
-                    >
-                      Close
-                    </v-btn>
-                    <v-btn
-                      color="blue darken-1"
-                      text
-                      @click="editDailog = false"
-                    >
-                      Save
-                    </v-btn>
-                  </v-card-actions>
-                </v-card>
-              </v-dialog>
-              
+
               <v-btn icon>
                 <v-icon @click="dialog = true" color="primary lighten-1"
                   >mdi-delete</v-icon
@@ -109,6 +73,21 @@
     <div class="text-center pt-10" v-else>
       <strong>No Task Yet...</strong>
     </div>
+
+    <v-snackbar
+      v-model="showMessage"
+      rounded="pill"
+      :color="messageColor"
+      :timeout="timeout"
+    >
+      {{ message }}
+
+      <template v-slot:action="{ attrs }">
+        <v-btn color="pink" text v-bind="attrs" @click="showMessage = false">
+          Close
+        </v-btn>
+      </template>
+    </v-snackbar>
   </div>
 </template>
 
@@ -117,6 +96,10 @@ export default {
   name: "Todo",
   data() {
     return {
+      timeout: 2000,
+      showMessage: false,
+      message: "",
+      messageColor: "green",
       editDailog: false,
       dialog: false,
       task: "",
@@ -124,14 +107,9 @@ export default {
     };
   },
   methods: {
-    toggleTask(id) {
-      let updateTask = this.todoTasks.filter((task) => task.id === id)[0];
-      updateTask.done = !updateTask.done;
-    },
-    deleteTask(id) {
-      this.todoTasks = this.todoTasks.filter((task) => task.id !== id);
-      this.dialog = false;
-    },
+    /**
+     * Add new task
+     */
     addNewTask() {
       this.todoTasks.push({
         id: Math.random(5),
@@ -142,6 +120,29 @@ export default {
       this.task = "";
 
       localStorage.setItem("todoTasks", this.todoTasks);
+
+      this.message = "Task added successfully!";
+      this.showMessage = true;
+    },
+    /**
+     * Toogle task
+     */
+    toggleTask(id) {
+      let updateTask = this.todoTasks.filter((task) => task.id === id)[0];
+      updateTask.done = !updateTask.done;
+      this.message = updateTask.done ? "Task moved to done" : "Task removed from done";
+      this.showMessage = true;
+      this.messageColor = updateTask.done ? "green" : "red"
+    },
+    /**
+     * Delete Task
+     */
+    deleteTask(id) {
+      this.todoTasks = this.todoTasks.filter((task) => task.id !== id);
+      this.dialog = false;
+      this.message = "Task deleted successfully!";
+      this.showMessage = true;
+      this.messageColor = "red"
     },
   },
 };
