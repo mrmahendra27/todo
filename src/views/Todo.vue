@@ -10,7 +10,7 @@
       @click:append="addNewTask"
       @keyup.enter="addNewTask"
     ></v-text-field>
-    <v-list flat class="pt-0" v-if="todoTasks.length">
+    <v-list flat class="pt-0" v-if="todoTasks.length > 0">
       <div v-for="task in todoTasks" :key="task.id">
         <v-list-item
           @click="toggleTask(task.id)"
@@ -106,11 +106,32 @@ export default {
       todoTasks: [],
     };
   },
+  mounted() {
+    if (localStorage.getItem("todoTasks")) {
+      try {
+        this.todoTasks = JSON.parse(localStorage.getItem("todoTasks"));
+      } catch (e) {
+        localStorage.removeItem("todoTasks");
+      }
+    }
+  },
+  watch: {
+    todoTasks: function () {
+      localStorage.setItem("todoTasks", JSON.stringify(this.todoTasks));
+    },
+  },
   methods: {
     /**
      * Add new task
      */
     addNewTask() {
+      if (!this.task) {
+        this.message = "Please enter task!";
+        this.showMessage = true;
+        this.messageColor = "red";
+        return;
+      }
+
       this.todoTasks.push({
         id: Math.random(5),
         title: this.task,
@@ -119,7 +140,7 @@ export default {
 
       this.task = "";
 
-      localStorage.setItem("todoTasks", this.todoTasks);
+      localStorage.setItem("todoTasks", JSON.stringify(this.todoTasks));
 
       this.message = "Task added successfully!";
       this.showMessage = true;
@@ -130,9 +151,12 @@ export default {
     toggleTask(id) {
       let updateTask = this.todoTasks.filter((task) => task.id === id)[0];
       updateTask.done = !updateTask.done;
-      this.message = updateTask.done ? "Task moved to done" : "Task removed from done";
+      this.message = updateTask.done
+        ? "Task moved to done"
+        : "Task removed from done";
       this.showMessage = true;
-      this.messageColor = updateTask.done ? "green" : "red"
+      this.messageColor = updateTask.done ? "green" : "red";
+      localStorage.setItem("todoTasks", JSON.stringify(this.todoTasks));
     },
     /**
      * Delete Task
@@ -142,7 +166,7 @@ export default {
       this.dialog = false;
       this.message = "Task deleted successfully!";
       this.showMessage = true;
-      this.messageColor = "red"
+      this.messageColor = "red";
     },
   },
 };
